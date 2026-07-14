@@ -21,37 +21,37 @@ class Sidebar extends Component
     {
         return [
             [
-                'label' => 'Dashboard',
+                'label' => __('Dashboard'),
                 'url' => route('dashboard'),
                 'active' => request()->routeIs('dashboard'),
                 'icon' => 'squares-2x2',
             ],
             [
-                'label' => 'Proxies',
+                'label' => __('Proxies'),
                 'url' => route('proxies.index'),
                 'active' => request()->routeIs('proxies.*'),
                 'icon' => 'queue-list',
             ],
             [
-                'label' => 'Sources',
+                'label' => __('Sources'),
                 'url' => route('sources.index'),
                 'active' => request()->routeIs('sources.*'),
                 'icon' => 'circle-stack',
             ],
             [
-                'label' => 'Exports',
+                'label' => __('Exports'),
                 'url' => route('exports.index'),
                 'active' => request()->routeIs('exports.*'),
                 'icon' => 'arrow-down-tray',
             ],
             [
-                'label' => 'API access',
+                'label' => __('API access'),
                 'url' => route('api-access'),
                 'active' => request()->routeIs('api-access'),
                 'icon' => 'code-bracket',
             ],
             [
-                'label' => 'Settings',
+                'label' => __('Settings'),
                 'url' => route('settings'),
                 'active' => request()->routeIs('settings'),
                 'icon' => 'cog-6-tooth',
