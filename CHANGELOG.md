@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - PP-1: Initial layout, navbar, dependencies
+- PP-2: Dashboard, Tracked, Passing Now, average latency, active sources, search filters, table, passed state
 
 ### Changed
 

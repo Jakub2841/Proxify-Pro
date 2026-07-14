@@ -12,6 +12,7 @@
         "php": "^8.3",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
+        "league/iso3166": "^4.4",
         "livewire/blaze": "^1.0",
         "livewire/flux": "*",
         "livewire/livewire": "^4.1"

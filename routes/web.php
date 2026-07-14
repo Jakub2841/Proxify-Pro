@@ -1,12 +1,13 @@
 <?php
 
+use App\Http\Controllers\ProxiesController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', [ProxiesController::class, 'index'])->name('home');
 
-Route::view('/dashboard', 'welcome')->name('dashboard');
-Route::view('/proxies', 'welcome')->name('proxies.index');
-Route::view('/sources', 'welcome')->name('sources.index');
-Route::view('/exports', 'welcome')->name('exports.index');
-Route::view('/api-access', 'welcome')->name('api-access');
-Route::view('/settings', 'welcome')->name('settings');
+Route::get('/dashboard', [ProxiesController::class, 'index'])->name('dashboard');
+Route::get('/proxies', [ProxiesController::class, 'index'])->name('proxies.index');
+Route::view('/sources', 'layouts.app')->name('sources.index');
+Route::view('/exports', 'layouts.app')->name('exports.index');
+Route::view('/api-access', 'layouts.app')->name('api-access');
+Route::view('/settings', 'layouts.app')->name('settings');
