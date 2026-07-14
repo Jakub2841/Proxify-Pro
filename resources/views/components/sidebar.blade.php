@@ -19,6 +19,7 @@
                 :href="$item['url']"
                 :icon="$item['icon']"
                 :current="$item['active']"
+                wire:navigate
             >
                 {{ $item['label'] }}
             </flux:navlist.item>

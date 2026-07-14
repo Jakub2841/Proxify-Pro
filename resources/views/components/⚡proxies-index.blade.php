@@ -1,6 +1,3 @@
-@extends('layouts.app')
-
-@section('content')
 <div class="flex h-full flex-col px-8 py-6">
 
     {{-- Top bar --}}
@@ -11,7 +8,7 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <flux:input icon="magnifying-glass" placeholder="{{ __('Search ip:port') }}" class="w-64 transition-shadow duration-200 focus-within:ring-1 focus-within:ring-accent/30!" />
+            <flux:input icon="magnifying-glass" placeholder="{{ __('Search ip:port') }}" wire:model.live="search" class="w-64 transition-shadow duration-200 focus-within:ring-1 focus-within:ring-accent/30!" />
         </div>
     </div>
 
@@ -29,21 +26,17 @@
 
     {{-- Filter bar --}}
     <div class="mb-6 rounded-xl border border-border bg-ink-panel px-5 py-3">
-        {{-- Row 1: protocol + checks --}}
-        <div class="flex items-center gap-2 border-b border-border-soft pb-3" x-data="{
-            activeProtocols: [],
-            activeChecks: [],
-            toggle(arr, val) { arr.includes(val) ? arr.splice(arr.indexOf(val), 1) : arr.push(val) }
-        }">
+        <div class="flex items-center gap-2 border-b border-border-soft pb-3">
             <span class="mr-2 text-[11px] font-medium text-text-muted">{{ __('Protocol') }}</span>
 
             @foreach ($protocols as $protocol)
                 <button
-                    @click="toggle(activeProtocols, '{{ $protocol->value }}')"
-                    :class="activeProtocols.includes('{{ $protocol->value }}')
-                        ? 'rounded-full border border-status-green bg-status-green/10 px-3.5 py-1.5 text-[11.5px] font-medium text-status-green'
-                        : 'rounded-full border border-border px-3.5 py-1.5 text-[11.5px] font-medium text-text-secondary hover:border-text-muted hover:text-text-primary'"
-                    class="rounded-full border border-border px-3.5 py-1.5 text-[11.5px] font-medium text-text-secondary transition-colors duration-200"
+                    wire:click="toggleProtocol('{{ $protocol->value }}')"
+                    @class([
+                        'rounded-full border px-3.5 py-1.5 text-[11.5px] font-medium transition-colors duration-200',
+                        'border-status-green bg-status-green/10 text-status-green' => in_array($protocol->value, $activeProtocols, true),
+                        'border-border text-text-secondary hover:border-text-muted hover:text-text-primary' => ! in_array($protocol->value, $activeProtocols, true),
+                    ])
                 >{{ $protocol->label() }}</button>
             @endforeach
 
@@ -53,22 +46,22 @@
 
             @foreach ($checks as $check)
                 <button
-                    @click="toggle(activeChecks, '{{ $check->value }}')"
-                    :class="activeChecks.includes('{{ $check->value }}')
-                        ? 'rounded-full border border-status-green bg-status-green/10 px-3.5 py-1.5 text-[11.5px] font-medium text-status-green'
-                        : 'rounded-full border border-border px-3.5 py-1.5 text-[11.5px] font-medium text-text-secondary hover:border-text-muted hover:text-text-primary'"
-                    class="rounded-full border border-border px-3.5 py-1.5 text-[11.5px] font-medium text-text-secondary transition-colors duration-200"
+                    wire:click="toggleCheck('{{ $check->value }}')"
+                    @class([
+                        'rounded-full border px-3.5 py-1.5 text-[11.5px] font-medium transition-colors duration-200',
+                        'border-status-green bg-status-green/10 text-status-green' => in_array($check->value, $activeChecks, true),
+                        'border-border text-text-secondary hover:border-text-muted hover:text-text-primary' => ! in_array($check->value, $activeChecks, true),
+                    ])
                 >{{ $check->label() }}</button>
             @endforeach
 
             <flux:button icon="arrow-down-tray" variant="primary" size="sm" class="ml-auto!">{{ __('Export list') }}</flux:button>
         </div>
 
-        {{-- Row 2: country + sort --}}
         <div class="flex items-center justify-between pt-3">
             <div class="flex items-center gap-2">
                 <span class="text-[11px] font-medium text-text-muted">{{ __('Country') }}</span>
-                <select class="rounded-lg border border-border bg-ink px-3 py-1.5 text-[11.5px] text-text-secondary transition-colors duration-200 hover:border-text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30">
+                <select wire:model="country" class="rounded-lg border border-border bg-ink px-3 py-1.5 text-[11.5px] text-text-secondary transition-colors duration-200 hover:border-text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30">
                     <option value="">{{ __('All countries') }}</option>
                     @foreach ($countries as $country)
                         <option value="{{ $country['alpha2'] }}">{{ $country['name'] }}</option>
@@ -78,13 +71,13 @@
 
             <div class="flex items-center gap-3">
                 <label class="flex items-center gap-2 text-[11px] font-medium text-text-muted">
-                    {{ __('Active only') }} <flux:switch class="[&[data-checked]]:bg-status-green! [&[data-checked]>span]:bg-white!" />
+                    {{ __('Active only') }} <flux:switch wire:model="activeOnly" class="[&[data-checked]]:bg-status-green! [&[data-checked]>span]:bg-white!" />
                 </label>
 
                 <span class="text-[11px] font-medium text-text-muted">{{ __('Sort') }}</span>
-                <select class="rounded-lg border border-border bg-ink px-3 py-1.5 text-[11.5px] text-text-secondary transition-colors duration-200 hover:border-text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30">
+                <select wire:change="applySort($event.target.value)" class="rounded-lg border border-border bg-ink px-3 py-1.5 text-[11.5px] text-text-secondary transition-colors duration-200 hover:border-text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30">
                     @foreach ($sortOptions as $option)
-                        <option value="{{ $option->value }}">{{ $option->label() }}</option>
+                        <option value="{{ $option->value }}" @selected($sort === $option->value)>{{ $option->label() }}</option>
                     @endforeach
                 </select>
             </div>
@@ -92,7 +85,7 @@
     </div>
 
     {{-- Table --}}
-    <div class="flex min-h-0 flex-1 flex-col">
+    <div class="flex min-h-0 flex-1 flex-col" wire:loading.class="opacity-50 transition-opacity">
     <flux:table container:class="h-full rounded-xl border border-border bg-ink-panel p-2!">
         <flux:table.columns sticky class="bg-ink-panel">
             <flux:table.column>{{ __('Address') }}</flux:table.column>
@@ -108,8 +101,8 @@
             @foreach ($proxies as $proxy)
                 <flux:table.row :key="$proxy->id" class="transition-colors hover:bg-ink">
                     <flux:table.cell variant="strong">
-                        <span class="inline-flex items-center justify-center" x-data="{ copied: false }">
-                            <span class="font-mono">{{ $proxy->address }}:{{ $proxy->port }}</span>
+                        <div class="flex items-center" x-data="{ copied: false }">
+                            <span class="font-mono w-[21ch] shrink-0">{{ $proxy->address }}:{{ $proxy->port }}</span>
                             <button
                                 @click="() => {
                                     const text = '{{ $proxy->address }}:{{ $proxy->port }}';
@@ -126,13 +119,13 @@
                                     copied = true;
                                     setTimeout(() => copied = false, 1500);
                                 }"
-                                class="shrink-0 ml-1 rounded-md p-1 text-text-muted transition-colors hover:bg-ink hover:text-accent"
+                                class="shrink-0 rounded-md p-1 text-text-muted transition-colors hover:bg-ink hover:text-accent"
                                 title="{{ __('Copy address') }}"
                             >
                                 <flux:icon.clipboard class="size-4" x-show="!copied" />
                                 <flux:icon.check class="size-4 text-status-green" x-show="copied" x-cloak />
                             </button>
-                        </span>
+                        </div>
                     </flux:table.cell>
                     <flux:table.cell align="center">{{ $proxy->protocol->label() }}</flux:table.cell>
                     <flux:table.cell align="center">
@@ -195,4 +188,3 @@
     </div>
 
 </div>
-@endsection
