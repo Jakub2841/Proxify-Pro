@@ -27,12 +27,6 @@ class Sidebar extends Component
                 'icon' => 'squares-2x2',
             ],
             [
-                'label' => __('Proxies'),
-                'url' => route('proxies.index'),
-                'active' => request()->routeIs('proxies.*'),
-                'icon' => 'queue-list',
-            ],
-            [
                 'label' => __('Sources'),
                 'url' => route('sources.index'),
                 'active' => request()->routeIs('sources.*'),
