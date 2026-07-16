@@ -22,3 +22,13 @@
     --color-status-red: #F87171;
     --color-status-amber: #FBBF24;
 }
+
+[type='number']::-webkit-inner-spin-button,
+[type='number']::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+}
+
+[type='number'] {
+    -moz-appearance: textfield;
+}

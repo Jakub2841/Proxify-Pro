@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ __('Proxify Pro') }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css'])
 </head>
 <body class="flex h-full overflow-hidden bg-ink text-text-primary font-sans antialiased">
     <x-sidebar />
@@ -16,5 +16,6 @@
 
     @fluxAppearance
     @fluxScripts
+    <flux:toast />
 </body>
 </html>

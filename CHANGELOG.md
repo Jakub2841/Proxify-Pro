@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PP-4: Sources CRUD + Proxy anonymity filter
 - PP-5: Proxy export system (CSV/TXT/JSON), shared filter scope, rate limiting
 - PP-6: REST API (JSON + TXT), rate limiting, API documentation page
+- PP-7: Settings page + code review fixes (validation, deduplication, debounced search)
 
 ### Changed
 

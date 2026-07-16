@@ -137,41 +137,18 @@ class ProxiesIndex extends Component
     }
 
     /**
-     * Apply all active filters to the query.
+     * Apply all active filters via the shared model scope.
      */
     private function buildQuery(Builder $query): Builder
     {
-        if ($this->activeProtocols !== []) {
-            $query->whereIn('protocol', $this->activeProtocols);
-        }
-
-        if ($this->activeChecks !== []) {
-            foreach ($this->activeChecks as $check) {
-                match ($check) {
-                    Check::Google->value => $query->where('google_pass', true),
-                    Check::Cloudflare->value => $query->where('cloudflare_pass', true),
-                    default => null,
-                };
-            }
-        }
-
-        if ($this->activeAnonymity !== []) {
-            $query->whereIn('anonymity', $this->activeAnonymity);
-        }
-
-        if ($this->country !== '') {
-            $query->where('country', $this->country);
-        }
-
-        if ($this->activeOnly) {
-            $query->where('is_active', true);
-        }
-
-        if ($this->search !== '') {
-            $query->where('address', 'like', '%'.$this->search.'%');
-        }
-
-        return $query;
+        return $query->filtered([
+            'protocols' => $this->activeProtocols,
+            'anonymity' => $this->activeAnonymity,
+            'checks' => $this->activeChecks,
+            'country' => $this->country,
+            'active_only' => $this->activeOnly,
+            'search' => $this->search,
+        ]);
     }
 
     /**

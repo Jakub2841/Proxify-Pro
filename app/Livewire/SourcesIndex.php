@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Source;
+use Flux\Flux;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -33,7 +35,7 @@ class SourcesIndex extends Component
 
     public function toggleEnabled(int $id): void
     {
-        Source::where('id', $id)->update(['is_enabled' => \DB::raw('NOT is_enabled')]);
+        Source::where('id', $id)->update(['is_enabled' => DB::raw('NOT is_enabled')]);
     }
 
     public function edit(int $id): void
@@ -63,6 +65,8 @@ class SourcesIndex extends Component
         }
 
         $this->reset(['showModal', 'editingId', 'name', 'url']);
+
+        Flux::toast(__('Source saved'), variant: 'success');
     }
 
     public function delete(int $id): void
