@@ -72,16 +72,16 @@
 
             <flux:button icon="arrow-path" variant="outline" size="sm" class="ml-auto!">{{ __('Scrape now') }}</flux:button>
             <flux:button icon="arrow-path" variant="outline" size="sm">{{ __('Check now') }}</flux:button>
-            <flux:button icon="arrow-down-tray" variant="primary" size="sm">{{ __('Export list') }}</flux:button>
+            <flux:button icon="arrow-down-tray" variant="primary" size="sm" wire:click="$set('showExportModal', true)">{{ __('Export') }}</flux:button>
         </div>
 
         <div class="flex items-center justify-between pt-3">
             <div class="flex items-center gap-2">
                 <span class="text-[11px] font-medium text-text-muted">{{ __('Country') }}</span>
-                <select wire:model="country" class="rounded-lg border border-border bg-ink px-3 py-1.5 text-[11.5px] text-text-secondary transition-colors duration-200 hover:border-text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30">
+                <select wire:change="applyCountry($event.target.value)" class="rounded-lg border border-border bg-ink px-3 py-1.5 text-[11.5px] text-text-secondary transition-colors duration-200 hover:border-text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30">
                     <option value="">{{ __('All countries') }}</option>
-                    @foreach ($countries as $country)
-                        <option value="{{ $country['alpha2'] }}">{{ $country['name'] }}</option>
+                    @foreach ($countries as $c)
+                        <option value="{{ $c['alpha2'] }}" @selected($country === $c['alpha2'])>{{ $c['name'] }}</option>
                     @endforeach
                 </select>
             </div>
@@ -100,6 +100,37 @@
             </div>
         </div>
     </div>
+
+    {{-- Export modal --}}
+    <flux:modal wire:model="showExportModal">
+        <div class="space-y-4">
+            <flux:heading size="lg">{{ __('Export proxies') }}</flux:heading>
+
+            <flux:field>
+                <flux:label>{{ __('Format') }}</flux:label>
+                <div class="flex gap-2">
+                    <flux:button wire:click="$set('exportFormat', 'csv')" variant="{{ $exportFormat === 'csv' ? 'primary' : 'outline' }}" size="sm">CSV</flux:button>
+                    <flux:button wire:click="$set('exportFormat', 'txt')" variant="{{ $exportFormat === 'txt' ? 'primary' : 'outline' }}" size="sm">TXT</flux:button>
+                    <flux:button wire:click="$set('exportFormat', 'json')" variant="{{ $exportFormat === 'json' ? 'primary' : 'outline' }}" size="sm">JSON</flux:button>
+                </div>
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('Data format') }}</flux:label>
+                <div class="flex gap-2">
+                    <flux:button wire:click="$set('exportDataFormat', 'ip_port')" variant="{{ $exportDataFormat === 'ip_port' ? 'primary' : 'outline' }}" size="sm">IP:Port</flux:button>
+                    <flux:button wire:click="$set('exportDataFormat', 'protocol_ip_port')" variant="{{ $exportDataFormat === 'protocol_ip_port' ? 'primary' : 'outline' }}" size="sm">{{ __('Protocol://IP:Port') }}</flux:button>
+                </div>
+            </flux:field>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <flux:button variant="ghost" wire:click="$set('showExportModal', false)">{{ __('Cancel') }}</flux:button>
+                <a href="{{ $this->exportUrl() }}" class="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-accent/80">
+                    <flux:icon.arrow-down-tray class="size-4" />{{ __('Download') }}
+                </a>
+            </div>
+        </div>
+    </flux:modal>
 
     {{-- Table --}}
     <div class="flex min-h-0 flex-1 flex-col" wire:loading.class="opacity-50 transition-opacity">

@@ -37,6 +37,12 @@ class ProxiesIndex extends Component
 
     public bool $activeOnly = false;
 
+    public bool $showExportModal = false;
+
+    public string $exportFormat = 'csv';
+
+    public string $exportDataFormat = 'ip_port';
+
     public function toggleProtocol(string $value): void
     {
         $this->toggleInArray($value, $this->activeProtocols);
@@ -84,9 +90,29 @@ class ProxiesIndex extends Component
         $this->resetPage();
     }
 
+    public function applyCountry(string $value): void
+    {
+        $this->country = $value;
+        $this->resetPage();
+    }
+
     public function updatedActiveOnly(): void
     {
         $this->resetPage();
+    }
+
+    public function exportUrl(): string
+    {
+        return route('export.proxies', [
+            'format' => $this->exportFormat,
+            'data_format' => $this->exportDataFormat,
+            'protocols' => $this->activeProtocols,
+            'anonymity' => $this->activeAnonymity,
+            'checks' => $this->activeChecks,
+            'country' => $this->country ?: null,
+            'active_only' => $this->activeOnly ? '1' : null,
+            'search' => $this->search ?: null,
+        ]);
     }
 
     public function render(): View

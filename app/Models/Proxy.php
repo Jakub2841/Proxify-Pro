@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\AnonymityLevel;
 use App\Enums\Protocol;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -61,5 +62,45 @@ class Proxy extends Model
             $this->latency_ms < 600 => 2,
             default => 1,
         };
+    }
+
+    /**
+     * Apply dashboard filter criteria to the query.
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function scopeFiltered(Builder $query, array $filters): Builder
+    {
+        if (! empty($filters['protocols'] ?? [])) {
+            $query->whereIn('protocol', $filters['protocols']);
+        }
+
+        if (! empty($filters['anonymity'] ?? [])) {
+            $query->whereIn('anonymity', $filters['anonymity']);
+        }
+
+        if (! empty($filters['checks'] ?? [])) {
+            foreach ($filters['checks'] as $check) {
+                match ($check) {
+                    'google' => $query->where('google_pass', true),
+                    'cloudflare' => $query->where('cloudflare_pass', true),
+                    default => null,
+                };
+            }
+        }
+
+        if (! empty($filters['country'] ?? '')) {
+            $query->where('country', $filters['country']);
+        }
+
+        if (! empty($filters['active_only'] ?? false)) {
+            $query->where('is_active', true);
+        }
+
+        if (! empty($filters['search'] ?? '')) {
+            $query->where('address', 'like', '%'.$filters['search'].'%');
+        }
+
+        return $query;
     }
 }
