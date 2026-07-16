@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AnonymityLevel;
 use App\Enums\Check;
 use App\Enums\Protocol;
 use App\Enums\SortOption;
@@ -10,11 +11,12 @@ use Livewire\Livewire;
 beforeEach(function () {
     // Create a known set of proxies for deterministic filter testing.
     Proxy::factory()->createMany([
-        // Google-passing HTTPS proxy from Germany, low latency, active
+        // Google-passing HTTPS proxy from Germany, low latency, active, elite
         [
             'address' => '1.1.1.1',
             'port' => 8080,
             'protocol' => 'https',
+            'anonymity' => 'elite',
             'country' => 'DE',
             'google_pass' => true,
             'cloudflare_pass' => false,
@@ -22,11 +24,12 @@ beforeEach(function () {
             'is_active' => true,
             'last_checked_at' => now()->subMinutes(5),
         ],
-        // Google + Cloudflare passing HTTP proxy from US, medium latency, active
+        // Google + Cloudflare passing HTTP proxy from US, medium latency, active, anonymous
         [
             'address' => '2.2.2.2',
             'port' => 3128,
             'protocol' => 'http',
+            'anonymity' => 'anonymous',
             'country' => 'US',
             'google_pass' => true,
             'cloudflare_pass' => true,
@@ -34,11 +37,12 @@ beforeEach(function () {
             'is_active' => true,
             'last_checked_at' => now()->subMinutes(3),
         ],
-        // SOCKS5 proxy from France, high latency, inactive
+        // SOCKS5 proxy from France, high latency, inactive, transparent
         [
             'address' => '3.3.3.3',
             'port' => 1080,
             'protocol' => 'socks5',
+            'anonymity' => 'transparent',
             'country' => 'FR',
             'google_pass' => false,
             'cloudflare_pass' => false,
@@ -46,11 +50,12 @@ beforeEach(function () {
             'is_active' => false,
             'last_checked_at' => now()->subMinutes(10),
         ],
-        // SOCKS4 proxy from Germany, passes Cloudflare only, active
+        // SOCKS4 proxy from Germany, passes Cloudflare only, active, anonymous
         [
             'address' => '4.4.4.4',
             'port' => 4145,
             'protocol' => 'socks4',
+            'anonymity' => 'anonymous',
             'country' => 'DE',
             'google_pass' => false,
             'cloudflare_pass' => true,
@@ -58,11 +63,12 @@ beforeEach(function () {
             'is_active' => true,
             'last_checked_at' => now()->subMinute(),
         ],
-        // HTTPS proxy from Japan, passes Google, active, no latency
+        // HTTPS proxy from Japan, passes Google, active, no latency, elite
         [
             'address' => '5.5.5.5',
             'port' => 443,
             'protocol' => 'https',
+            'anonymity' => 'elite',
             'country' => 'JP',
             'google_pass' => true,
             'cloudflare_pass' => false,
@@ -273,4 +279,32 @@ test('stats show global counts when no filters are active', function () {
             return $stats[0]['label'] === 'Tracked'
                 && $stats[0]['value'] === '5';
         });
+});
+
+// ─── Anonymity filter ───────────────────────────────────────────────────────
+
+test('filters proxies by anonymity level', function () {
+    Livewire::test(ProxiesIndex::class)
+        ->call('toggleAnonymity', AnonymityLevel::Elite->value)
+        ->assertViewHas('proxies', function ($proxies) {
+            return $proxies->count() === 2
+                && $proxies->every(fn ($p) => $p->anonymity === AnonymityLevel::Elite);
+        });
+});
+
+test('filters proxies by multiple anonymity levels', function () {
+    Livewire::test(ProxiesIndex::class)
+        ->call('toggleAnonymity', AnonymityLevel::Elite->value)
+        ->call('toggleAnonymity', AnonymityLevel::Anonymous->value)
+        ->assertViewHas('proxies', function ($proxies) {
+            return $proxies->count() === 4;
+        });
+});
+
+test('toggling an anonymity level off removes the filter', function () {
+    Livewire::test(ProxiesIndex::class)
+        ->call('toggleAnonymity', AnonymityLevel::Elite->value)
+        ->assertViewHas('proxies', fn ($p) => $p->count() === 2)
+        ->call('toggleAnonymity', AnonymityLevel::Elite->value)
+        ->assertViewHas('proxies', fn ($p) => $p->count() === 5);
 });

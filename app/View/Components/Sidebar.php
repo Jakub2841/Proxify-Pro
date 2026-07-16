@@ -33,12 +33,6 @@ class Sidebar extends Component
                 'icon' => 'circle-stack',
             ],
             [
-                'label' => __('Exports'),
-                'url' => route('exports.index'),
-                'active' => request()->routeIs('exports.*'),
-                'icon' => 'arrow-down-tray',
-            ],
-            [
                 'label' => __('API access'),
                 'url' => route('api-access'),
                 'active' => request()->routeIs('api-access'),

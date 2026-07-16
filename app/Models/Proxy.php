@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AnonymityLevel;
 use App\Enums\Protocol;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,7 @@ class Proxy extends Model
         'address',
         'port',
         'protocol',
+        'anonymity',
         'country',
         'google_pass',
         'cloudflare_pass',
@@ -26,6 +28,7 @@ class Proxy extends Model
     {
         return [
             'protocol' => Protocol::class,
+            'anonymity' => AnonymityLevel::class,
             'google_pass' => 'boolean',
             'cloudflare_pass' => 'boolean',
             'is_active' => 'boolean',
