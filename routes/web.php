@@ -13,5 +13,5 @@ Route::get('/export/proxies/{format}', ExportProxiesController::class)
     ->where('format', 'csv|txt|json')
     ->middleware('throttle:10,1')
     ->name('export.proxies');
-Route::view('/api-access', 'layouts.app')->name('api-access');
+Route::view('/api-access', 'api-access')->name('api-access');
 Route::view('/settings', 'layouts.app')->name('settings');
