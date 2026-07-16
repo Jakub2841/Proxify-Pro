@@ -8,7 +8,7 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <flux:input icon="magnifying-glass" placeholder="{{ __('Search ip:port') }}" wire:model.live="search" class="w-64 transition-shadow duration-200 focus-within:ring-1 focus-within:ring-accent/30!" />
+            <flux:input icon="magnifying-glass" placeholder="{{ __('Search ip:port') }}" wire:model.live.debounce.300ms="search" class="w-64 transition-shadow duration-200 focus-within:ring-1 focus-within:ring-accent/30!" />
         </div>
     </div>
 

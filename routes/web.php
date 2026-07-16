@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ExportProxiesController;
 use App\Livewire\ProxiesIndex;
+use App\Livewire\SettingsIndex;
 use App\Livewire\SourcesIndex;
 use Illuminate\Support\Facades\Route;
 
@@ -14,4 +15,4 @@ Route::get('/export/proxies/{format}', ExportProxiesController::class)
     ->middleware('throttle:10,1')
     ->name('export.proxies');
 Route::view('/api-access', 'api-access')->name('api-access');
-Route::view('/settings', 'layouts.app')->name('settings');
+Route::get('/settings', SettingsIndex::class)->name('settings');
