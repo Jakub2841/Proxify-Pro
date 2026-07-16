@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             ProxySeeder::class,
+            SourceSeeder::class,
         ]);
 
         User::factory()->create([

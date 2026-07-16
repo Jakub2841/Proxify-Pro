@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - PP-1: Initial layout, navbar, dependencies
 - PP-2: Dashboard, Tracked, Passing Now, average latency, active sources, search filters, table, passed state
+- PP-3: Proxy model, migration, seeder, Eloquent queries, live filtering, pagination, country names
+- PP-4: Sources CRUD + Proxy anonymity filter
 
 ### Changed
 

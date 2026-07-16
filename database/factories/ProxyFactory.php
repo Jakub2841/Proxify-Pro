@@ -18,12 +18,14 @@ class ProxyFactory extends Factory
     public function definition(): array
     {
         $protocols = ['https', 'http', 'socks5', 'socks4'];
+        $anonymity = ['elite', 'anonymous', 'transparent'];
         $countries = ['DE', 'NL', 'US', 'PL', 'FR', 'GB', 'SG', 'JP', 'CA', 'BR'];
 
         return [
             'address' => fake()->ipv4(),
             'port' => fake()->numberBetween(80, 65535),
             'protocol' => fake()->randomElement($protocols),
+            'anonymity' => fake()->randomElement($anonymity),
             'country' => fake()->randomElement($countries),
             'google_pass' => fake()->boolean(70),
             'cloudflare_pass' => fake()->boolean(60),

@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\AnonymityLevel;
 use App\Enums\Check;
 use App\Enums\Protocol;
 use App\Enums\SortOption;
@@ -25,6 +26,9 @@ class ProxiesIndex extends Component
     /** @var string[] */
     public array $activeChecks = [];
 
+    /** @var string[] */
+    public array $activeAnonymity = [];
+
     public string $country = '';
 
     public string $sort = 'last_checked_desc';
@@ -35,21 +39,25 @@ class ProxiesIndex extends Component
 
     public function toggleProtocol(string $value): void
     {
-        if (in_array($value, $this->activeProtocols, true)) {
-            $this->activeProtocols = array_values(array_diff($this->activeProtocols, [$value]));
-        } else {
-            $this->activeProtocols[] = $value;
-        }
-
-        $this->resetPage();
+        $this->toggleInArray($value, $this->activeProtocols);
     }
 
     public function toggleCheck(string $value): void
     {
-        if (in_array($value, $this->activeChecks, true)) {
-            $this->activeChecks = array_values(array_diff($this->activeChecks, [$value]));
+        $this->toggleInArray($value, $this->activeChecks);
+    }
+
+    public function toggleAnonymity(string $value): void
+    {
+        $this->toggleInArray($value, $this->activeAnonymity);
+    }
+
+    private function toggleInArray(string $value, array &$target): void
+    {
+        if (in_array($value, $target, true)) {
+            $target = array_values(array_diff($target, [$value]));
         } else {
-            $this->activeChecks[] = $value;
+            $target[] = $value;
         }
 
         $this->resetPage();
@@ -96,6 +104,7 @@ class ProxiesIndex extends Component
             'proxies' => $query->paginate(20),
             'protocols' => Protocol::cases(),
             'checks' => Check::cases(),
+            'anonymityLevels' => AnonymityLevel::cases(),
             'sortOptions' => SortOption::cases(),
             'countries' => Cache::rememberForever('countries', fn () => (new ISO3166)->all()),
         ]);
@@ -120,6 +129,10 @@ class ProxiesIndex extends Component
             }
         }
 
+        if ($this->activeAnonymity !== []) {
+            $query->whereIn('anonymity', $this->activeAnonymity);
+        }
+
         if ($this->country !== '') {
             $query->where('country', $this->country);
         }
@@ -140,7 +153,7 @@ class ProxiesIndex extends Component
      */
     private function stats(Builder $query): array
     {
-        $isFiltered = $this->activeProtocols !== [] || $this->activeChecks !== [] || $this->country !== '' || $this->activeOnly || $this->search !== '';
+        $isFiltered = $this->activeProtocols !== [] || $this->activeChecks !== [] || $this->activeAnonymity !== [] || $this->country !== '' || $this->activeOnly || $this->search !== '';
 
         if ($isFiltered) {
             return [

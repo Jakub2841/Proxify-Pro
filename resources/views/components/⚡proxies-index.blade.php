@@ -42,6 +42,21 @@
 
             <flux:separator vertical />
 
+            <span class="mr-2 text-[11px] font-medium text-text-muted">{{ __('Anonymity') }}</span>
+
+            @foreach ($anonymityLevels as $level)
+                <button
+                    wire:click="toggleAnonymity('{{ $level->value }}')"
+                    @class([
+                        'rounded-full border px-3.5 py-1.5 text-[11.5px] font-medium transition-colors duration-200',
+                        'border-status-green bg-status-green/10 text-status-green' => in_array($level->value, $activeAnonymity, true),
+                        'border-border text-text-secondary hover:border-text-muted hover:text-text-primary' => ! in_array($level->value, $activeAnonymity, true),
+                    ])
+                >{{ $level->label() }}</button>
+            @endforeach
+
+            <flux:separator vertical />
+
             <span class="mr-2 text-[11px] font-medium text-text-muted">{{ __('Checks') }}</span>
 
             @foreach ($checks as $check)
@@ -55,7 +70,9 @@
                 >{{ $check->label() }}</button>
             @endforeach
 
-            <flux:button icon="arrow-down-tray" variant="primary" size="sm" class="ml-auto!">{{ __('Export list') }}</flux:button>
+            <flux:button icon="arrow-path" variant="outline" size="sm" class="ml-auto!">{{ __('Scrape now') }}</flux:button>
+            <flux:button icon="arrow-path" variant="outline" size="sm">{{ __('Check now') }}</flux:button>
+            <flux:button icon="arrow-down-tray" variant="primary" size="sm">{{ __('Export list') }}</flux:button>
         </div>
 
         <div class="flex items-center justify-between pt-3">
@@ -90,6 +107,7 @@
         <flux:table.columns sticky class="bg-ink-panel">
             <flux:table.column>{{ __('Address') }}</flux:table.column>
             <flux:table.column align="center">{{ __('Protocol') }}</flux:table.column>
+            <flux:table.column align="center">{{ __('Anonymity') }}</flux:table.column>
             <flux:table.column align="center">{{ __('Country') }}</flux:table.column>
             <flux:table.column align="center">{{ __('Google') }}</flux:table.column>
             <flux:table.column align="center">{{ __('Cloudflare') }}</flux:table.column>
@@ -128,6 +146,7 @@
                         </div>
                     </flux:table.cell>
                     <flux:table.cell align="center">{{ $proxy->protocol->label() }}</flux:table.cell>
+                    <flux:table.cell align="center">{{ $proxy->anonymity?->label() ?? '—' }}</flux:table.cell>
                     <flux:table.cell align="center">
                         <span class="inline-flex items-center gap-1.5">
                             <span>{{ $proxy->country_flag }}</span>
