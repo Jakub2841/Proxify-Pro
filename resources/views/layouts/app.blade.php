@@ -10,7 +10,8 @@
     <x-sidebar />
 
     <main class="flex-1 overflow-hidden">
-        {{ $slot }}
+        {{ $slot ?? '' }}
+        @yield('content')
     </main>
 
     @fluxAppearance
