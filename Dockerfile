@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 RUN apk add --no-cache \
     nginx \
@@ -13,7 +13,8 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer install --no-dev --no-interaction --optimize-autoloader \
+RUN mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs \
+    && composer install --no-dev --no-interaction --optimize-autoloader \
     && npm ci && npm run build \
     && rm -rf node_modules \
     && chown -R www-data:www-data storage bootstrap/cache database \

@@ -13,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        config()->set('app.production_mode', env('PRODUCTION_MODE', 'no') === 'yes');
     }
 
     public function boot(): void
