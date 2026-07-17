@@ -14,26 +14,26 @@
                 <div class="flex items-center gap-6 px-5 py-3.5">
                     <span class="w-40 shrink-0 text-[11.5px] font-medium text-text-secondary">{{ __('Scrape interval') }}</span>
                     <div class="flex items-center gap-1.5 font-mono text-sm">
-                        <input type="number" min="1" wire:model="scrapeInterval" class="w-16 rounded-md border border-border bg-ink px-2 py-1 text-right text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30" />
+                        <input type="number" min="1" wire:model="scrapeInterval" @disabled($productionMode) class="w-16 rounded-md border border-border bg-ink px-2 py-1 text-right text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30" />
                         <span class="text-text-muted">min</span>
                     </div>
                     <div class="ml-auto">
-                        <flux:switch wire:model="scrapeEnabled" class="[&[data-checked]]:bg-status-green! [&[data-checked]>span]:bg-white!" />
+                        <flux:switch wire:model="scrapeEnabled" :disabled="$productionMode" class="[&[data-checked]]:bg-status-green! [&[data-checked]>span]:bg-white!" />
                     </div>
                 </div>
                 <div class="flex items-center gap-6 px-5 py-3.5">
                     <span class="w-40 shrink-0 text-[11.5px] font-medium text-text-secondary">{{ __('Check interval') }}</span>
                     <div class="flex items-center gap-1.5 font-mono text-sm">
-                        <input type="number" min="1" wire:model="checkInterval" class="w-16 rounded-md border border-border bg-ink px-2 py-1 text-right text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30" />
+                        <input type="number" min="1" wire:model="checkInterval" @disabled($productionMode) class="w-16 rounded-md border border-border bg-ink px-2 py-1 text-right text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30" />
                         <span class="text-text-muted">min</span>
                     </div>
                     <div class="ml-auto">
-                        <flux:switch wire:model="checkEnabled" class="[&[data-checked]]:bg-status-green! [&[data-checked]>span]:bg-white!" />
+                        <flux:switch wire:model="checkEnabled" :disabled="$productionMode" class="[&[data-checked]]:bg-status-green! [&[data-checked]>span]:bg-white!" />
                     </div>
                 </div>
                 <div class="flex items-center justify-between px-5 py-3.5">
                     <span class="text-[11.5px] font-medium text-text-secondary">{{ __('Remove not passing proxies') }}</span>
-                    <flux:switch wire:model="saveInactive" class="[&[data-checked]]:bg-status-green! [&[data-checked]>span]:bg-white!" />
+                    <flux:switch wire:model="saveInactive" :disabled="$productionMode" class="[&[data-checked]]:bg-status-green! [&[data-checked]>span]:bg-white!" />
                 </div>
             </div>
         </div>
@@ -44,7 +44,7 @@
                 <div class="flex items-center gap-6 px-5 py-3.5">
                     <span class="w-40 shrink-0 text-[11.5px] font-medium text-text-secondary">{{ __('Max latency') }}</span>
                     <div class="flex items-center gap-1.5 font-mono text-sm">
-                        <input type="number" min="1" wire:model="maxLatency" class="w-20 rounded-md border border-border bg-ink px-2 py-1 text-right text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30" />
+                        <input type="number" min="1" wire:model="maxLatency" @disabled($productionMode) class="w-20 rounded-md border border-border bg-ink px-2 py-1 text-right text-sm text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30" />
                         <span class="text-text-muted">ms</span>
                     </div>
                 </div>
@@ -60,7 +60,7 @@
             <div class="rounded-xl border border-border bg-ink-panel">
                 <div class="flex items-center justify-between px-5 py-3.5">
                     <span class="text-[11.5px] font-medium text-text-secondary">{{ __('Public API access') }}</span>
-                    <flux:switch wire:model="apiAccess" class="[&[data-checked]]:bg-status-green! [&[data-checked]>span]:bg-white!" />
+                    <flux:switch wire:model="apiAccess" :disabled="$productionMode" class="[&[data-checked]]:bg-status-green! [&[data-checked]>span]:bg-white!" />
                 </div>
             </div>
         </div>
@@ -70,7 +70,7 @@
             <div class="rounded-xl border border-border bg-ink-panel">
                 <div class="flex items-center justify-between px-5 py-3.5">
                     <span class="text-[11.5px] font-medium text-text-secondary">{{ __('Clear all proxies') }}</span>
-                    <flux:button variant="danger" size="sm" wire:click="$set('showClearDbModal', true)">{{ __('Clear database') }}</flux:button>
+                    <flux:button variant="danger" size="sm" wire:click="$set('showClearDbModal', true)" :disabled="$productionMode">{{ __('Clear database') }}</flux:button>
                 </div>
             </div>
         </div>
@@ -90,7 +90,9 @@
     </flux:modal>
 
     <div class="mt-8 max-w-2xl flex justify-end">
+        @unless ($productionMode)
         <flux:button variant="primary" wire:click="save">{{ __('Save changes') }}</flux:button>
+        @endunless
     </div>
 
 </div>

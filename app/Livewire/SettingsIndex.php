@@ -32,8 +32,14 @@ class SettingsIndex extends Component
 
     public bool $showClearDbModal = false;
 
+    public bool $productionMode = false;
+
     public function clearDatabase(): void
     {
+        if ($this->productionMode) {
+            return;
+        }
+
         Proxy::query()->delete();
 
         $this->showClearDbModal = false;
@@ -43,6 +49,7 @@ class SettingsIndex extends Component
 
     public function mount(): void
     {
+        $this->productionMode = env('PRODUCTION_MODE', 'no') === 'yes';
         $this->scrapeInterval = Setting::get('scrape_interval', 30);
         $this->scrapeEnabled = Setting::get('scrape_enabled', true);
         $this->checkInterval = Setting::get('check_interval', 15);
@@ -54,6 +61,10 @@ class SettingsIndex extends Component
 
     public function save(): void
     {
+        if ($this->productionMode) {
+            return;
+        }
+
         $this->validate();
 
         Setting::put('scrape_interval', $this->scrapeInterval);
