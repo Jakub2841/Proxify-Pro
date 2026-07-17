@@ -19,8 +19,12 @@ class CheckProxies implements ShouldQueue
     {
         Cache::put('checking', true, 600);
 
-        foreach (Proxy::stale()->cursor() as $proxy) {
-            CheckProxy::dispatch($proxy);
+        try {
+            foreach (Proxy::stale()->cursor() as $proxy) {
+                CheckProxy::dispatch($proxy);
+            }
+        } finally {
+            Cache::forget('checking');
         }
     }
 }
