@@ -36,7 +36,7 @@ class ProxiesIndex extends Component
 
     public string $country = '';
 
-    public string $sort = 'last_checked_desc';
+    public string $sort = 'latency_asc';
 
     public string $search = '';
 
@@ -164,8 +164,8 @@ class ProxiesIndex extends Component
         $query = $this->buildQuery(Proxy::query());
 
         match ($this->sort) {
-            SortOption::LatencyAsc->value => $query->whereNotNull('latency_ms')->orderBy('latency_ms', 'asc'),
-            SortOption::LatencyDesc->value => $query->whereNotNull('latency_ms')->orderBy('latency_ms', 'desc'),
+            SortOption::LatencyAsc->value => $query->orderByRaw('latency_ms IS NULL, latency_ms ASC'),
+            SortOption::LatencyDesc->value => $query->orderByRaw('latency_ms IS NULL, latency_ms DESC'),
             default => $query->latest('last_checked_at'),
         };
 

@@ -205,30 +205,33 @@ test('search is case-insensitive partial match', function () {
 
 // ─── Sort filter ────────────────────────────────────────────────────────────
 
-test('sorts by latency ascending, excluding nulls', function () {
+test('sorts by latency ascending, nulls last', function () {
     Livewire::test(ProxiesIndex::class)
         ->set('sort', SortOption::LatencyAsc->value)
         ->assertViewHas('proxies', function ($proxies) {
             $latencies = $proxies->pluck('latency_ms')->toArray();
 
-            return $latencies === [50, 80, 120, 500];
+            return $latencies === [50, 80, 120, 500, null];
         });
 });
 
-test('sorts by latency descending, excluding nulls', function () {
+test('sorts by latency descending, nulls last', function () {
     Livewire::test(ProxiesIndex::class)
         ->set('sort', SortOption::LatencyDesc->value)
         ->assertViewHas('proxies', function ($proxies) {
             $latencies = $proxies->pluck('latency_ms')->toArray();
 
-            return $latencies === [500, 120, 80, 50];
+            return $latencies === [500, 120, 80, 50, null];
         });
 });
 
-test('default sort is last checked descending', function () {
+test('default sort is latency ascending', function () {
     Livewire::test(ProxiesIndex::class)
         ->assertViewHas('proxies', function ($proxies) {
-            return $proxies->first()->address === '4.4.4.4'; // checked 1 min ago
+            $latencies = $proxies->pluck('latency_ms')->toArray();
+
+            return $latencies === [50, 80, 120, 500, null]
+                && $proxies->first()->address === '1.1.1.1'; // lowest latency
         });
 });
 
