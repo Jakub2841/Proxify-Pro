@@ -36,7 +36,7 @@ class ProxiesIndex extends Component
 
     public string $country = '';
 
-    public string $sort = 'last_checked_desc';
+    public string $sort = 'latency_asc';
 
     public string $search = '';
 
@@ -164,8 +164,8 @@ class ProxiesIndex extends Component
         $query = $this->buildQuery(Proxy::query());
 
         match ($this->sort) {
-            SortOption::LatencyAsc->value => $query->whereNotNull('latency_ms')->orderBy('latency_ms', 'asc'),
-            SortOption::LatencyDesc->value => $query->whereNotNull('latency_ms')->orderBy('latency_ms', 'desc'),
+            SortOption::LatencyAsc->value => $query->orderByRaw('latency_ms IS NULL, latency_ms ASC'),
+            SortOption::LatencyDesc->value => $query->orderByRaw('latency_ms IS NULL, latency_ms DESC'),
             default => $query->latest('last_checked_at'),
         };
 
@@ -237,7 +237,7 @@ class ProxiesIndex extends Component
             ];
         }
 
-        return Cache::get('proxy-stats', fn () => [
+        return Cache::remember('proxy-stats', 60, fn () => [
             ['label' => __('Tracked'), 'value' => number_format(Proxy::count())],
             ['label' => __('Passing now'), 'value' => number_format(Proxy::where('is_active', true)->where(fn ($q) => $q->where('google_pass', true)->orWhere('cloudflare_pass', true))->count()), 'accent' => true],
             ['label' => __('Avg latency'), 'value' => round(Proxy::whereNotNull('latency_ms')->avg('latency_ms') ?? 0).' ms'],

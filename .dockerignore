@@ -14,7 +14,4 @@ phpunit.xml
 phpstan.neon
 pint.json
 supervisor.conf
-docker-compose.yml
-Dockerfile
-.docker
 .github

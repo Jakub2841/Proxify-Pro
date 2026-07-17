@@ -32,11 +32,9 @@ class SettingsIndex extends Component
 
     public bool $showClearDbModal = false;
 
-    public bool $productionMode = false;
-
     public function clearDatabase(): void
     {
-        if ($this->productionMode) {
+        if ($this->isProduction()) {
             return;
         }
 
@@ -49,7 +47,6 @@ class SettingsIndex extends Component
 
     public function mount(): void
     {
-        $this->productionMode = env('PRODUCTION_MODE', 'no') === 'yes';
         $this->scrapeInterval = Setting::get('scrape_interval', 30);
         $this->scrapeEnabled = Setting::get('scrape_enabled', true);
         $this->checkInterval = Setting::get('check_interval', 15);
@@ -61,7 +58,7 @@ class SettingsIndex extends Component
 
     public function save(): void
     {
-        if ($this->productionMode) {
+        if ($this->isProduction()) {
             return;
         }
 
@@ -80,6 +77,13 @@ class SettingsIndex extends Component
 
     public function render(): View
     {
-        return view('livewire.settings-index');
+        return view('livewire.settings-index', [
+            'productionMode' => $this->isProduction(),
+        ]);
+    }
+
+    private function isProduction(): bool
+    {
+        return config('app.production_mode', false);
     }
 }

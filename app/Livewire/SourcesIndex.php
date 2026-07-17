@@ -50,8 +50,6 @@ class SourcesIndex extends Component
 
     public bool $allEnabled;
 
-    public bool $productionMode = false;
-
     public function updatedUrl(string $value): void
     {
         $rewritten = self::rewriteGitHubUrl($value);
@@ -80,13 +78,12 @@ class SourcesIndex extends Component
 
     public function mount(): void
     {
-        $this->productionMode = env('PRODUCTION_MODE', 'no') === 'yes';
         $this->allEnabled = Source::where('is_enabled', false)->doesntExist();
     }
 
     public function toggleEnabled(int $id): void
     {
-        if ($this->productionMode) {
+        if ($this->isProduction()) {
             return;
         }
 
@@ -95,7 +92,7 @@ class SourcesIndex extends Component
 
     public function addNew(): void
     {
-        if ($this->productionMode) {
+        if ($this->isProduction()) {
             return;
         }
 
@@ -110,7 +107,7 @@ class SourcesIndex extends Component
 
     public function edit(int $id): void
     {
-        if ($this->productionMode) {
+        if ($this->isProduction()) {
             return;
         }
 
@@ -174,7 +171,7 @@ class SourcesIndex extends Component
 
     public function save(): void
     {
-        if ($this->productionMode) {
+        if ($this->isProduction()) {
             return;
         }
 
@@ -207,7 +204,7 @@ class SourcesIndex extends Component
 
     public function delete(int $id): void
     {
-        if ($this->productionMode) {
+        if ($this->isProduction()) {
             return;
         }
 
@@ -216,7 +213,7 @@ class SourcesIndex extends Component
 
     public function updatedAllEnabled(bool $value): void
     {
-        if ($this->productionMode) {
+        if ($this->isProduction()) {
             return;
         }
 
@@ -227,7 +224,7 @@ class SourcesIndex extends Component
 
     public function clearAll(): void
     {
-        if ($this->productionMode) {
+        if ($this->isProduction()) {
             return;
         }
 
@@ -252,7 +249,7 @@ class SourcesIndex extends Component
 
     public function updatedImportFile(): void
     {
-        if ($this->productionMode) {
+        if ($this->isProduction()) {
             return;
         }
 
@@ -358,6 +355,12 @@ class SourcesIndex extends Component
     {
         return view('livewire.sources-index', [
             'sources' => Source::latest('last_scraped_at')->paginate(20),
+            'productionMode' => $this->isProduction(),
         ]);
+    }
+
+    private function isProduction(): bool
+    {
+        return config('app.production_mode', false);
     }
 }
