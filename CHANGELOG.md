@@ -28,4 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Geo-location lookups now route through the proxy being tested instead of connecting directly from the server, so the geo service sees the proxy's actual location
+
 ### Security

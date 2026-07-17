@@ -88,8 +88,12 @@ class CheckProxy implements ShouldQueue
     private function lookupCountry(): ?string
     {
         try {
-            $response = Http::timeout(5)
-                ->get('http://ip-api.com/json/'.$this->proxy->address);
+            $response = Http::withOptions([
+                'proxy' => $this->proxy->protocol->value.'://'.$this->proxy->address.':'.$this->proxy->port,
+            ])
+                ->connectTimeout(0.5)
+                ->timeout(5)
+                ->get('http://ip-api.com/json');
 
             if ($response->successful()) {
                 return $response->json('countryCode');
