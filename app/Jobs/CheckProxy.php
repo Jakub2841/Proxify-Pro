@@ -100,9 +100,10 @@ class CheckProxy implements ShouldBeUnique, ShouldQueue
     private function lookupCountry(): ?string
     {
         try {
-            $response = Http::withOptions([
-                'proxy' => $this->proxy->connectionUri(),
-            ])
+            $response = Http::retry(2, 200)
+                ->withOptions([
+                    'proxy' => $this->proxy->connectionUri(),
+                ])
                 ->connectTimeout(0.5)
                 ->timeout(5)
                 ->get('http://ip-api.com/json');
