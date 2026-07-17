@@ -50,6 +50,8 @@ class SourcesIndex extends Component
 
     public bool $allEnabled;
 
+    public bool $productionMode = false;
+
     public function updatedUrl(string $value): void
     {
         $rewritten = self::rewriteGitHubUrl($value);
@@ -78,16 +80,25 @@ class SourcesIndex extends Component
 
     public function mount(): void
     {
+        $this->productionMode = env('PRODUCTION_MODE', 'no') === 'yes';
         $this->allEnabled = Source::where('is_enabled', false)->doesntExist();
     }
 
     public function toggleEnabled(int $id): void
     {
+        if ($this->productionMode) {
+            return;
+        }
+
         Source::where('id', $id)->update(['is_enabled' => DB::raw('NOT is_enabled')]);
     }
 
     public function addNew(): void
     {
+        if ($this->productionMode) {
+            return;
+        }
+
         $this->reset(['showModal', 'editingId', 'name', 'url', 'parser_type', 'parser_config', 'default_protocol', 'isDetecting', 'detectionError', 'detectionNotice']);
         $this->showModal = true;
     }
@@ -99,6 +110,10 @@ class SourcesIndex extends Component
 
     public function edit(int $id): void
     {
+        if ($this->productionMode) {
+            return;
+        }
+
         $this->reset(['isDetecting', 'detectionError', 'detectionNotice']);
 
         $source = Source::findOrFail($id);
@@ -159,6 +174,10 @@ class SourcesIndex extends Component
 
     public function save(): void
     {
+        if ($this->productionMode) {
+            return;
+        }
+
         $this->validate();
 
         $data = [
@@ -188,11 +207,19 @@ class SourcesIndex extends Component
 
     public function delete(int $id): void
     {
+        if ($this->productionMode) {
+            return;
+        }
+
         Source::findOrFail($id)->delete();
     }
 
     public function updatedAllEnabled(bool $value): void
     {
+        if ($this->productionMode) {
+            return;
+        }
+
         Source::query()->update(['is_enabled' => $value]);
     }
 
@@ -200,6 +227,10 @@ class SourcesIndex extends Component
 
     public function clearAll(): void
     {
+        if ($this->productionMode) {
+            return;
+        }
+
         Source::query()->delete();
 
         $this->showClearModal = false;
@@ -221,6 +252,10 @@ class SourcesIndex extends Component
 
     public function updatedImportFile(): void
     {
+        if ($this->productionMode) {
+            return;
+        }
+
         $this->validateOnly('importFile');
 
         $data = json_decode(file_get_contents($this->importFile->getRealPath()), true);

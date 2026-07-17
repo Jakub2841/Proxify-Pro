@@ -9,12 +9,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Remove duplicates before adding the unique constraint.
-        DB::statement('
-            DELETE FROM proxies WHERE id NOT IN (
-                SELECT MIN(id) FROM proxies GROUP BY address, port
-            )
-        ');
+        $driver = DB::getDriverName();
+
+        if ($driver === 'mysql') {
+            DB::statement('
+                DELETE p1 FROM proxies p1
+                INNER JOIN proxies p2
+                WHERE p1.id > p2.id AND p1.address = p2.address AND p1.port = p2.port
+            ');
+        } else {
+            DB::statement('
+                DELETE FROM proxies WHERE id NOT IN (
+                    SELECT MIN(id) FROM proxies GROUP BY address, port
+                )
+            ');
+        }
 
         Schema::table('proxies', function (Blueprint $table) {
             $table->unique(['address', 'port']);

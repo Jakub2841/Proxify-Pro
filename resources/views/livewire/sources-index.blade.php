@@ -8,12 +8,16 @@
         </div>
 
         <div class="flex items-center gap-2">
+            @unless ($productionMode)
             <input type="file" wire:model="importFile" accept=".json" class="hidden" x-ref="importInput">
             <flux:button icon="arrow-down-tray" variant="outline" size="sm" x-on:click="$refs.importInput.click()">{{ __('Import') }}</flux:button>
+            @endunless
             <flux:button icon="arrow-up-tray" variant="outline" size="sm" wire:click="exportSources">{{ __('Export') }}</flux:button>
+            @unless ($productionMode)
             <flux:button icon="plus" variant="primary" wire:click="addNew">
                 {{ __('Add source') }}
             </flux:button>
+            @endunless
         </div>
     </div>
 
@@ -141,6 +145,7 @@
     </flux:modal>
 
     {{-- Bulk controls --}}
+    @unless ($productionMode)
     <div class="mb-4 flex items-center gap-4 rounded-xl border border-border bg-ink-panel px-5 py-3">
         <label class="flex items-center gap-2 text-[11.5px] font-medium text-text-muted">
             <span class="w-[12ch] shrink-0">{{ $allEnabled ? __('Disable all') : __('Enable all') }}</span>
@@ -151,6 +156,7 @@
             {{ __('Clear all sources') }}
         </flux:button>
     </div>
+    @endunless
 
     {{-- Table --}}
     <div class="flex min-h-0 flex-1 flex-col">
@@ -171,6 +177,7 @@
                     <flux:table.cell variant="strong">
                         <div class="flex items-center">
                             <span class="w-[24ch] shrink-0 truncate">{{ $source->name }}</span>
+                            @unless ($productionMode)
                             <button
                                 wire:click="edit({{ $source->id }})"
                                 class="shrink-0 rounded-md p-1 text-text-muted transition-colors hover:bg-ink hover:text-accent"
@@ -178,6 +185,7 @@
                             >
                                 <flux:icon.pencil class="size-4" />
                             </button>
+                            @endunless
                         </div>
                     </flux:table.cell>
                     <flux:table.cell>
@@ -193,6 +201,7 @@
                         </span>
                     </flux:table.cell>
                     <flux:table.cell align="center">
+                        @unless ($productionMode)
                         <button
                             wire:click="toggleEnabled({{ $source->id }})"
                             class="inline-flex cursor-pointer transition-transform duration-200 hover:scale-110"
@@ -204,6 +213,13 @@
                                 <flux:icon.x-circle class="text-status-red" variant="solid" />
                             @endif
                         </button>
+                        @else
+                            @if ($source->is_enabled)
+                                <flux:icon.check-circle class="text-status-green" variant="solid" />
+                            @else
+                                <flux:icon.x-circle class="text-status-red" variant="solid" />
+                            @endif
+                        @endunless
                     </flux:table.cell>
                     <flux:table.cell align="center">
                         <span class="font-mono">{{ number_format($source->proxy_count) }}</span>
@@ -220,6 +236,7 @@
                         </span>
                     </flux:table.cell>
                     <flux:table.cell align="center">
+                        @unless ($productionMode)
                         <button
                             wire:click="delete({{ $source->id }})"
                             class="rounded-md p-1 text-text-muted transition-colors hover:bg-ink hover:text-status-red"
@@ -227,6 +244,7 @@
                         >
                             <flux:icon.trash class="size-4" />
                         </button>
+                        @endunless
                     </flux:table.cell>
                 </flux:table.row>
             @endforeach
