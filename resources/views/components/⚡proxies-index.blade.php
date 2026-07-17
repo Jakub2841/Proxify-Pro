@@ -71,7 +71,7 @@
             @endforeach
 
             <flux:button icon="arrow-path" variant="outline" size="sm" class="ml-auto!" wire:click="scrapeSources" wire:loading.attr="disabled" wire:target="scrapeSources">{{ __('Scrape now') }}</flux:button>
-            <flux:button icon="arrow-path" variant="outline" size="sm">{{ __('Check now') }}</flux:button>
+            <flux:button icon="arrow-path" variant="outline" size="sm" wire:click="checkProxies" wire:loading.attr="disabled" wire:target="checkProxies">{{ __('Check now') }}</flux:button>
             <flux:button icon="arrow-down-tray" variant="primary" size="sm" wire:click="$set('showExportModal', true)">{{ __('Export') }}</flux:button>
         </div>
 
@@ -225,11 +225,28 @@
     </div>
 
     {{-- Footer --}}
-    <div class="mt-4 flex items-center justify-between text-[11.5px] text-text-secondary">
+    <div class="mt-4 flex items-center justify-between text-[11.5px] text-text-secondary" x-data="{
+        scrapeLeft: {{ $scrapeRemaining }},
+        checkLeft: {{ $checkRemaining }},
+        init() {
+            setInterval(() => { this.scrapeLeft = Math.max(0, this.scrapeLeft - 1); this.checkLeft = Math.max(0, this.checkLeft - 1) }, 1000)
+        },
+        fmt(s) { const m = Math.floor(s / 60), sec = s % 60; return m + ':' + String(sec).padStart(2, '0') }
+    }">
         <span class="leading-none">{{ __('Showing :from–:to of :total', ['from' => $proxies->firstItem(), 'to' => $proxies->lastItem(), 'total' => $proxies->total()]) }}</span>
-        <span class="inline-flex items-center gap-1.5 leading-none">
-            <span class="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-status-green"></span>
-            {{ __('Next scrape in 00:00') }}
+        <span class="inline-flex items-center gap-3 leading-none">
+            @if ($scrapeEnabled)
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent"></span>
+                    {{ __('Next scrape') }} <span x-text="fmt(scrapeLeft)" class="font-mono tabular-nums">0:00</span>
+                </span>
+            @endif
+            @if ($checkEnabled)
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-status-green"></span>
+                    {{ __('Next check') }} <span x-text="fmt(checkLeft)" class="font-mono tabular-nums">0:00</span>
+                </span>
+            @endif
         </span>
     </div>
 

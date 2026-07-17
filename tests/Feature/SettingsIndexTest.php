@@ -10,7 +10,6 @@ test('renders with default values when no settings exist', function () {
         ->assertSet('checkInterval', 15)
         ->assertSet('maxLatency', 2000)
         ->assertSet('apiAccess', true)
-        ->assertSet('autoCleanPeriod', 30)
         ->assertSet('saveInactive', false);
 });
 
@@ -19,7 +18,6 @@ test('loads existing settings from database', function () {
     Setting::put('check_interval', 10);
     Setting::put('max_latency', 1000);
     Setting::put('api_access', false);
-    Setting::put('auto_clean_period', 14);
     Setting::put('save_inactive', true);
 
     Livewire::test(SettingsIndex::class)
@@ -27,7 +25,6 @@ test('loads existing settings from database', function () {
         ->assertSet('checkInterval', 10)
         ->assertSet('maxLatency', 1000)
         ->assertSet('apiAccess', false)
-        ->assertSet('autoCleanPeriod', 14)
         ->assertSet('saveInactive', true);
 });
 

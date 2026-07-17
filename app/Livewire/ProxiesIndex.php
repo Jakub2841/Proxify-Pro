@@ -6,8 +6,10 @@ use App\Enums\AnonymityLevel;
 use App\Enums\Check;
 use App\Enums\Protocol;
 use App\Enums\SortOption;
+use App\Jobs\CheckProxies;
 use App\Jobs\ScrapeSourceJob;
 use App\Models\Proxy;
+use App\Models\Setting;
 use App\Models\Source;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
@@ -118,10 +120,29 @@ class ProxiesIndex extends Component
             ScrapeSourceJob::dispatch($source);
         }
 
+        Cache::put('last_auto_scrape', now()->toIso8601String(), now()->addHours(2));
+
         Flux::toast(
             __(':count sources dispatched for scraping.', ['count' => $sources->count()]),
             variant: 'success',
         );
+    }
+
+    public function checkProxies(): void
+    {
+        if (Cache::get('checking')) {
+            Flux::toast(__('Already checking'), variant: 'danger');
+
+            return;
+        }
+
+        Cache::put('checking', true, 600);
+
+        CheckProxies::dispatch();
+
+        Cache::put('last_auto_check', now()->toIso8601String(), now()->addHours(2));
+
+        Flux::toast(__('Proxy check dispatched.'), variant: 'success');
     }
 
     public function exportUrl(): string
@@ -143,8 +164,8 @@ class ProxiesIndex extends Component
         $query = $this->buildQuery(Proxy::query());
 
         match ($this->sort) {
-            SortOption::LatencyAsc->value => $query->orderBy('latency_ms', 'asc'),
-            SortOption::LatencyDesc->value => $query->orderBy('latency_ms', 'desc'),
+            SortOption::LatencyAsc->value => $query->whereNotNull('latency_ms')->orderBy('latency_ms', 'asc'),
+            SortOption::LatencyDesc->value => $query->whereNotNull('latency_ms')->orderBy('latency_ms', 'desc'),
             default => $query->latest('last_checked_at'),
         };
 
@@ -156,7 +177,33 @@ class ProxiesIndex extends Component
             'anonymityLevels' => AnonymityLevel::cases(),
             'sortOptions' => SortOption::cases(),
             'countries' => Cache::rememberForever('countries', fn () => (new ISO3166)->all()),
+            'scrapeEnabled' => Setting::get('scrape_enabled', true),
+            'checkEnabled' => Setting::get('check_enabled', true),
+            'scrapeRemaining' => $this->remainingSeconds('last_auto_scrape', Setting::get('scrape_interval', 30)),
+            'checkRemaining' => $this->remainingSeconds('last_auto_check', Setting::get('check_interval', 15)),
         ]);
+    }
+
+    private function remainingSeconds(string $cacheKey, int $intervalMinutes): int
+    {
+        $lastRun = Cache::get($cacheKey);
+
+        if ($lastRun === null) {
+            return 0;
+        }
+
+        if ($lastRun instanceof \DateTimeInterface) {
+            $lastRun = $lastRun->format('Y-m-d\TH:i:sP');
+        }
+
+        if (! is_string($lastRun)) {
+            return 0;
+        }
+
+        $elapsed = now()->diffInSeconds($lastRun);
+        $total = $intervalMinutes * 60;
+
+        return max(0, $total - $elapsed);
     }
 
     /**
@@ -184,7 +231,7 @@ class ProxiesIndex extends Component
         if ($isFiltered) {
             return [
                 ['label' => __('Filtered'), 'value' => number_format((clone $query)->toBase()->count())],
-                ['label' => __('Passing'), 'value' => number_format((clone $query)->where('google_pass', true)->count()), 'accent' => true],
+                ['label' => __('Passing'), 'value' => number_format((clone $query)->where(fn ($q) => $q->where('google_pass', true)->orWhere('cloudflare_pass', true))->count()), 'accent' => true],
                 ['label' => __('Avg latency'), 'value' => round((clone $query)->whereNotNull('latency_ms')->avg('latency_ms') ?? 0).' ms'],
                 ['label' => __('Active'), 'value' => number_format((clone $query)->where('is_active', true)->count())],
             ];
@@ -192,7 +239,7 @@ class ProxiesIndex extends Component
 
         return Cache::get('proxy-stats', fn () => [
             ['label' => __('Tracked'), 'value' => number_format(Proxy::count())],
-            ['label' => __('Passing now'), 'value' => number_format(Proxy::where('is_active', true)->where('google_pass', true)->count()), 'accent' => true],
+            ['label' => __('Passing now'), 'value' => number_format(Proxy::where('is_active', true)->where(fn ($q) => $q->where('google_pass', true)->orWhere('cloudflare_pass', true))->count()), 'accent' => true],
             ['label' => __('Avg latency'), 'value' => round(Proxy::whereNotNull('latency_ms')->avg('latency_ms') ?? 0).' ms'],
             ['label' => __('Active sources'), 'value' => number_format(Proxy::where('is_active', true)->count())],
         ]);

@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Enums\CleanupPeriod;
+use App\Models\Proxy;
 use App\Models\Setting;
 use Flux\Flux;
 use Illuminate\View\View;
@@ -16,26 +16,39 @@ class SettingsIndex extends Component
     #[Validate('integer|min:1')]
     public int $scrapeInterval = 30;
 
+    public bool $scrapeEnabled = true;
+
     #[Validate('integer|min:1')]
     public int $checkInterval = 15;
+
+    public bool $checkEnabled = true;
 
     #[Validate('integer|min:1')]
     public int $maxLatency = 2000;
 
     public bool $apiAccess = true;
 
-    #[Validate('integer|min:0')]
-    public int $autoCleanPeriod = 30;
-
     public bool $saveInactive = false;
+
+    public bool $showClearDbModal = false;
+
+    public function clearDatabase(): void
+    {
+        Proxy::query()->delete();
+
+        $this->showClearDbModal = false;
+
+        Flux::toast(__('All proxies deleted.'), variant: 'success');
+    }
 
     public function mount(): void
     {
         $this->scrapeInterval = Setting::get('scrape_interval', 30);
+        $this->scrapeEnabled = Setting::get('scrape_enabled', true);
         $this->checkInterval = Setting::get('check_interval', 15);
+        $this->checkEnabled = Setting::get('check_enabled', true);
         $this->maxLatency = Setting::get('max_latency', 2000);
         $this->apiAccess = Setting::get('api_access', true);
-        $this->autoCleanPeriod = Setting::get('auto_clean_period', 30);
         $this->saveInactive = Setting::get('save_inactive', false);
     }
 
@@ -44,10 +57,11 @@ class SettingsIndex extends Component
         $this->validate();
 
         Setting::put('scrape_interval', $this->scrapeInterval);
+        Setting::put('scrape_enabled', $this->scrapeEnabled);
         Setting::put('check_interval', $this->checkInterval);
+        Setting::put('check_enabled', $this->checkEnabled);
         Setting::put('max_latency', $this->maxLatency);
         Setting::put('api_access', $this->apiAccess);
-        Setting::put('auto_clean_period', $this->autoCleanPeriod);
         Setting::put('save_inactive', $this->saveInactive);
 
         Flux::toast(__('Settings saved'), variant: 'success');
@@ -55,8 +69,6 @@ class SettingsIndex extends Component
 
     public function render(): View
     {
-        return view('livewire.settings-index', [
-            'cleanupPeriods' => CleanupPeriod::cases(),
-        ]);
+        return view('livewire.settings-index');
     }
 }

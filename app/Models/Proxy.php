@@ -69,6 +69,12 @@ class Proxy extends Model
      *
      * @param  array<string, mixed>  $filters
      */
+    public function scopeStale(Builder $query, int $minutes = 30): Builder
+    {
+        return $query->whereNull('last_checked_at')
+            ->orWhere('last_checked_at', '<', now()->subMinutes($minutes));
+    }
+
     public function scopeFiltered(Builder $query, array $filters): Builder
     {
         if (! empty($filters['protocols'] ?? [])) {

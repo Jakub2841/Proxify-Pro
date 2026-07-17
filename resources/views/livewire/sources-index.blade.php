@@ -8,8 +8,9 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <flux:button icon="arrow-down-tray" variant="outline" size="sm">{{ __('Import') }}</flux:button>
-            <flux:button icon="arrow-up-tray" variant="outline" size="sm">{{ __('Export') }}</flux:button>
+            <input type="file" wire:model="importFile" accept=".json" class="hidden" x-ref="importInput">
+            <flux:button icon="arrow-down-tray" variant="outline" size="sm" x-on:click="$refs.importInput.click()">{{ __('Import') }}</flux:button>
+            <flux:button icon="arrow-up-tray" variant="outline" size="sm" wire:click="exportSources">{{ __('Export') }}</flux:button>
             <flux:button icon="plus" variant="primary" wire:click="addNew">
                 {{ __('Add source') }}
             </flux:button>
