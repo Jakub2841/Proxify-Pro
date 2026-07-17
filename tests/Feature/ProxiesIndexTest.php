@@ -4,8 +4,12 @@ use App\Enums\AnonymityLevel;
 use App\Enums\Check;
 use App\Enums\Protocol;
 use App\Enums\SortOption;
+use App\Enums\SourceParserType;
+use App\Jobs\ScrapeSourceJob;
 use App\Livewire\ProxiesIndex;
 use App\Models\Proxy;
+use App\Models\Source;
+use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -307,4 +311,40 @@ test('toggling an anonymity level off removes the filter', function () {
         ->assertViewHas('proxies', fn ($p) => $p->count() === 2)
         ->call('toggleAnonymity', AnonymityLevel::Elite->value)
         ->assertViewHas('proxies', fn ($p) => $p->count() === 5);
+});
+
+// ─── Scrape ─────────────────────────────────────────────────────────────────
+
+test('scrape button queues enabled sources and shows toast', function () {
+    Queue::fake();
+
+    Source::factory()->create([
+        'name' => 'Test Source',
+        'url' => 'https://example.com/proxies.txt',
+        'is_enabled' => true,
+        'parser_type' => SourceParserType::PlainText,
+        'default_protocol' => Protocol::Http,
+    ]);
+
+    Livewire::test(ProxiesIndex::class)
+        ->call('scrapeSources');
+
+    Queue::assertPushed(ScrapeSourceJob::class, 1);
+});
+
+test('scrape toast warns when no enabled sources exist', function () {
+    Queue::fake();
+
+    Source::factory()->create([
+        'name' => 'Disabled Source',
+        'url' => 'https://example.com/proxies.txt',
+        'is_enabled' => false,
+        'parser_type' => SourceParserType::PlainText,
+        'default_protocol' => Protocol::Http,
+    ]);
+
+    Livewire::test(ProxiesIndex::class)
+        ->call('scrapeSources');
+
+    Queue::assertNothingPushed();
 });

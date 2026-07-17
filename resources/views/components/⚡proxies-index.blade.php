@@ -70,7 +70,7 @@
                 >{{ $check->label() }}</button>
             @endforeach
 
-            <flux:button icon="arrow-path" variant="outline" size="sm" class="ml-auto!">{{ __('Scrape now') }}</flux:button>
+            <flux:button icon="arrow-path" variant="outline" size="sm" class="ml-auto!" wire:click="scrapeSources" wire:loading.attr="disabled" wire:target="scrapeSources">{{ __('Scrape now') }}</flux:button>
             <flux:button icon="arrow-path" variant="outline" size="sm">{{ __('Check now') }}</flux:button>
             <flux:button icon="arrow-down-tray" variant="primary" size="sm" wire:click="$set('showExportModal', true)">{{ __('Export') }}</flux:button>
         </div>
@@ -148,7 +148,7 @@
 
         <flux:table.rows>
             @foreach ($proxies as $proxy)
-                <flux:table.row :key="$proxy->id" class="transition-colors hover:bg-ink">
+                <flux:table.row :key="$proxy->id" wire:key="proxy-{{ $proxy->id }}" class="transition-colors hover:bg-ink">
                     <flux:table.cell variant="strong">
                         <div class="flex items-center" x-data="{ copied: false }">
                             <span class="font-mono w-[21ch] shrink-0">{{ $proxy->address }}:{{ $proxy->port }}</span>

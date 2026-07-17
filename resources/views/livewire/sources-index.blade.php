@@ -10,7 +10,7 @@
         <div class="flex items-center gap-2">
             <flux:button icon="arrow-down-tray" variant="outline" size="sm">{{ __('Import') }}</flux:button>
             <flux:button icon="arrow-up-tray" variant="outline" size="sm">{{ __('Export') }}</flux:button>
-            <flux:button icon="plus" variant="primary" wire:click="$set('showModal', true)">
+            <flux:button icon="plus" variant="primary" wire:click="addNew">
                 {{ __('Add source') }}
             </flux:button>
         </div>
@@ -29,12 +29,99 @@
 
             <flux:field>
                 <flux:label>{{ __('URL') }}</flux:label>
-                <flux:input wire:model="url" placeholder="https://..." />
+                <div class="flex gap-2">
+                    <flux:input wire:model="url" placeholder="https://..." class="flex-1" />
+                    <flux:button
+                        variant="outline"
+                        size="sm"
+                        wire:click="detectSource"
+                        wire:loading.attr="disabled"
+                        wire:target="detectSource"
+                    >
+                        <span wire:loading.remove wire:target="detectSource">{{ __('Detect format & columns') }}</span>
+                        <span wire:loading wire:target="detectSource" class="flex items-center gap-1.5">
+                            <flux:icon.arrow-path class="size-3.5 animate-spin" />
+                            {{ __('Detecting…') }}
+                        </span>
+                    </flux:button>
+                </div>
                 <flux:error name="url" />
             </flux:field>
 
+            {{-- Detection notice (non-blocking, e.g. low-confidence columns) --}}
+            @if ($detectionNotice)
+                <flux:callout
+                    variant="warning"
+                    icon="exclamation-triangle"
+                    heading="{{ __('Detection') }}"
+                    text="{{ $detectionNotice }}"
+                />
+            @endif
+
+            {{-- Detection errors (blocking, e.g. HTTP failure) --}}
+            @if ($detectionError)
+                <flux:callout
+                    variant="danger"
+                    icon="exclamation-triangle"
+                    heading="{{ __('Detection') }}"
+                    text="{{ $detectionError }}"
+                />
+            @endif
+
+            {{-- Parser type select --}}
+            <flux:field>
+                <flux:label>{{ __('Parser type') }}</flux:label>
+                <flux:select wire:model="parser_type">
+                    <option value="">{{ __('Select a parser type…') }}</option>
+                    @foreach (\App\Enums\SourceParserType::cases() as $type)
+                        @if ($type->isSupported())
+                            <option value="{{ $type->value }}">{{ $type->label() }}</option>
+                        @endif
+                    @endforeach
+                </flux:select>
+                <flux:error name="parser_type" />
+            </flux:field>
+
+            {{-- HtmlTable config fields --}}
+            @if ($parser_type === \App\Enums\SourceParserType::HtmlTable->value)
+                <div class="space-y-3 rounded-lg border border-border bg-ink p-3">
+                    <flux:text class="text-[11.5px] font-medium text-text-secondary">{{ __('Column detection results') }}</flux:text>
+
+                    <flux:field>
+                        <flux:label>{{ __('Row selector') }}</flux:label>
+                        <flux:input wire:model="parser_config.row_selector" placeholder="table#proxylist tr" />
+                        <flux:error name="parser_config.row_selector" />
+                    </flux:field>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <flux:field>
+                            <flux:label>{{ __('Address column') }}</flux:label>
+                            <flux:input type="number" min="0" wire:model="parser_config.address_col" placeholder="0" />
+                            <flux:error name="parser_config.address_col" />
+                        </flux:field>
+
+                        <flux:field>
+                            <flux:label>{{ __('Port column') }}</flux:label>
+                            <flux:input type="number" min="0" wire:model="parser_config.port_col" placeholder="1" />
+                            <flux:error name="parser_config.port_col" />
+                        </flux:field>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Default protocol --}}
+            <flux:field>
+                <flux:label>{{ __('Default protocol') }}</flux:label>
+                <flux:select wire:model="default_protocol">
+                    <option value="">{{ __('None (auto-detect from source)') }}</option>
+                    @foreach (\App\Enums\Protocol::cases() as $protocol)
+                        <option value="{{ $protocol->value }}">{{ $protocol->label() }}</option>
+                    @endforeach
+                </flux:select>
+            </flux:field>
+
             <div class="flex justify-end gap-2 pt-2">
-                <flux:button variant="ghost" wire:click="$set('showModal', false)">{{ __('Cancel') }}</flux:button>
+                <flux:button variant="ghost" wire:click="cancel">{{ __('Cancel') }}</flux:button>
                 <flux:button type="submit" variant="primary">{{ __('Save') }}</flux:button>
             </div>
         </form>
@@ -79,7 +166,7 @@
 
         <flux:table.rows>
             @foreach ($sources as $source)
-                <flux:table.row :key="$source->id" class="transition-colors hover:bg-ink">
+                <flux:table.row :key="$source->id" wire:key="source-{{ $source->id }}" class="transition-colors hover:bg-ink">
                     <flux:table.cell variant="strong">
                         <div class="flex items-center">
                             <span class="w-[24ch] shrink-0 truncate">{{ $source->name }}</span>

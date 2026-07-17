@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('address', 45);
             $table->unsignedSmallInteger('port');
             $table->string('protocol');
-            $table->string('country', 2);
+            $table->string('country', 2)->nullable();
             $table->boolean('google_pass')->default(false);
             $table->boolean('cloudflare_pass')->default(false);
             $table->unsignedMediumInteger('latency_ms')->nullable();
