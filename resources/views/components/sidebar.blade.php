@@ -16,6 +16,7 @@
     <flux:navlist class="px-4 py-4 text-base">
         @foreach ($navItems as $item)
             <flux:navlist.item
+                wire:key="nav-{{ $item['label'] }}"
                 :href="$item['url']"
                 :icon="$item['icon']"
                 :current="$item['active']"
