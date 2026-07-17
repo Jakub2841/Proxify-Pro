@@ -237,7 +237,7 @@ class ProxiesIndex extends Component
             ];
         }
 
-        return Cache::get('proxy-stats', fn () => [
+        return Cache::remember('proxy-stats', 60, fn () => [
             ['label' => __('Tracked'), 'value' => number_format(Proxy::count())],
             ['label' => __('Passing now'), 'value' => number_format(Proxy::where('is_active', true)->where(fn ($q) => $q->where('google_pass', true)->orWhere('cloudflare_pass', true))->count()), 'accent' => true],
             ['label' => __('Avg latency'), 'value' => round(Proxy::whereNotNull('latency_ms')->avg('latency_ms') ?? 0).' ms'],
