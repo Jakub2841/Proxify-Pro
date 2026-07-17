@@ -6,7 +6,10 @@ use App\Enums\AnonymityLevel;
 use App\Enums\Check;
 use App\Enums\Protocol;
 use App\Enums\SortOption;
+use App\Jobs\ScrapeSourceJob;
 use App\Models\Proxy;
+use App\Models\Source;
+use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
@@ -99,6 +102,26 @@ class ProxiesIndex extends Component
     public function updatedActiveOnly(): void
     {
         $this->resetPage();
+    }
+
+    public function scrapeSources(): void
+    {
+        $sources = Source::where('is_enabled', true)->get();
+
+        if ($sources->isEmpty()) {
+            Flux::toast(__('No enabled sources to scrape.'), variant: 'warning');
+
+            return;
+        }
+
+        foreach ($sources as $source) {
+            ScrapeSourceJob::dispatch($source);
+        }
+
+        Flux::toast(
+            __(':count sources dispatched for scraping.', ['count' => $sources->count()]),
+            variant: 'success',
+        );
     }
 
     public function exportUrl(): string
