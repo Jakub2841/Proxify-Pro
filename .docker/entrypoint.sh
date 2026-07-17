@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+cp /var/www/html/.env.docker /var/www/html/.env
+
 php artisan migrate --force
 php artisan config:cache
 php artisan route:cache

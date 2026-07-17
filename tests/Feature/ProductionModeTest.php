@@ -9,11 +9,18 @@ use App\Models\Setting;
 use App\Models\Source;
 use Livewire\Livewire;
 
+beforeEach(function () {
+    config()->set('app.production_mode', true);
+});
+
+afterEach(function () {
+    config()->set('app.production_mode', false);
+});
+
 // ─── Settings ───────────────────────────────────────────────────────────────
 
 test('settings save is blocked in production mode', function () {
     Livewire::test(SettingsIndex::class)
-        ->set('productionMode', true)
         ->set('scrapeInterval', 99)
         ->call('save');
 
@@ -24,7 +31,6 @@ test('clear database is blocked in production mode', function () {
     Proxy::factory()->create(['address' => '1.1.1.1', 'port' => 80, 'protocol' => 'http']);
 
     Livewire::test(SettingsIndex::class)
-        ->set('productionMode', true)
         ->call('clearDatabase');
 
     expect(Proxy::count())->toBe(1);
@@ -34,7 +40,6 @@ test('clear database is blocked in production mode', function () {
 
 test('add source is blocked in production mode', function () {
     Livewire::test(SourcesIndex::class)
-        ->set('productionMode', true)
         ->call('addNew')
         ->assertSet('showModal', false);
 });
@@ -43,14 +48,12 @@ test('edit source is blocked in production mode', function () {
     $source = Source::factory()->create(['name' => 'Test', 'url' => 'https://example.com']);
 
     Livewire::test(SourcesIndex::class)
-        ->set('productionMode', true)
         ->call('edit', $source->id)
         ->assertSet('showModal', false);
 });
 
 test('save source is blocked in production mode', function () {
     Livewire::test(SourcesIndex::class)
-        ->set('productionMode', true)
         ->set('name', 'Hacked')
         ->set('url', 'https://hacked.com')
         ->set('parser_type', 'plain_text')
@@ -63,7 +66,6 @@ test('delete source is blocked in production mode', function () {
     $source = Source::factory()->create();
 
     Livewire::test(SourcesIndex::class)
-        ->set('productionMode', true)
         ->call('delete', $source->id);
 
     expect(Source::find($source->id))->not->toBeNull();
@@ -73,7 +75,6 @@ test('toggle enabled is blocked in production mode', function () {
     $source = Source::factory()->create(['is_enabled' => true]);
 
     Livewire::test(SourcesIndex::class)
-        ->set('productionMode', true)
         ->call('toggleEnabled', $source->id);
 
     expect(Source::find($source->id)->is_enabled)->toBeTrue();
@@ -83,7 +84,6 @@ test('bulk enable/disable is blocked in production mode', function () {
     Source::factory()->create(['is_enabled' => true]);
 
     Livewire::test(SourcesIndex::class)
-        ->set('productionMode', true)
         ->set('allEnabled', false);
 
     expect(Source::first()->is_enabled)->toBeTrue();
@@ -93,7 +93,6 @@ test('clear all sources is blocked in production mode', function () {
     Source::factory()->create();
 
     Livewire::test(SourcesIndex::class)
-        ->set('productionMode', true)
         ->call('clearAll');
 
     expect(Source::count())->toBe(1);
