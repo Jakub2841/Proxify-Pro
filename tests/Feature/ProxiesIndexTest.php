@@ -205,23 +205,23 @@ test('search is case-insensitive partial match', function () {
 
 // ─── Sort filter ────────────────────────────────────────────────────────────
 
-test('sorts by latency ascending', function () {
+test('sorts by latency ascending, excluding nulls', function () {
     Livewire::test(ProxiesIndex::class)
         ->set('sort', SortOption::LatencyAsc->value)
         ->assertViewHas('proxies', function ($proxies) {
             $latencies = $proxies->pluck('latency_ms')->toArray();
 
-            return $latencies === [null, 50, 80, 120, 500]; // SQLite: NULLs first on ASC
+            return $latencies === [50, 80, 120, 500];
         });
 });
 
-test('sorts by latency descending', function () {
+test('sorts by latency descending, excluding nulls', function () {
     Livewire::test(ProxiesIndex::class)
         ->set('sort', SortOption::LatencyDesc->value)
         ->assertViewHas('proxies', function ($proxies) {
             $latencies = $proxies->pluck('latency_ms')->toArray();
 
-            return $latencies === [500, 120, 80, 50, null]; // SQLite: NULLs last on DESC
+            return $latencies === [500, 120, 80, 50];
         });
 });
 

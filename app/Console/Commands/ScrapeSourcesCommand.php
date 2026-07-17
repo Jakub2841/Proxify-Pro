@@ -36,9 +36,7 @@ class ScrapeSourcesCommand extends Command
             }
         }
 
-        if ($total > 0) {
-            Cache::put('proxies-updated', true, 300);
-        }
+        Cache::put('last_auto_scrape', now()->toIso8601String(), now()->addHours(2));
 
         $this->info("Done. {$total} new proxies added from {$sources->count()} sources.");
 

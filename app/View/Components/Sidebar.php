@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Models\Setting;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
@@ -14,12 +15,9 @@ class Sidebar extends Component
         ]);
     }
 
-    /**
-     * @return array<int, array{label: string, url: string, active: bool, icon: string}>
-     */
     public function navItems(): array
     {
-        return [
+        $items = [
             [
                 'label' => __('Dashboard'),
                 'url' => route('dashboard'),
@@ -32,18 +30,24 @@ class Sidebar extends Component
                 'active' => request()->routeIs('sources.*'),
                 'icon' => 'circle-stack',
             ],
-            [
+        ];
+
+        if (Setting::get('api_access', true)) {
+            $items[] = [
                 'label' => __('API access'),
                 'url' => route('api-access'),
                 'active' => request()->routeIs('api-access'),
                 'icon' => 'code-bracket',
-            ],
-            [
-                'label' => __('Settings'),
-                'url' => route('settings'),
-                'active' => request()->routeIs('settings'),
-                'icon' => 'cog-6-tooth',
-            ],
+            ];
+        }
+
+        $items[] = [
+            'label' => __('Settings'),
+            'url' => route('settings'),
+            'active' => request()->routeIs('settings'),
+            'icon' => 'cog-6-tooth',
         ];
+
+        return $items;
     }
 }

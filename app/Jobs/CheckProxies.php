@@ -2,20 +2,25 @@
 
 namespace App\Jobs;
 
+use App\Models\Proxy;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class CheckProxies implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct() {}
+    public int $timeout = 30;
+
+    public int $tries = 1;
 
     public function handle(): void
     {
-        Log::info('CheckProxies: starting');
-        // TODO: implement proxy checking logic
-        Log::info('CheckProxies: complete');
+        Cache::put('checking', true, 600);
+
+        foreach (Proxy::stale()->cursor() as $proxy) {
+            CheckProxy::dispatch($proxy);
+        }
     }
 }

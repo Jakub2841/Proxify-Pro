@@ -13,11 +13,14 @@ use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[Layout('layouts.app')]
 class SourcesIndex extends Component
 {
+    use WithFileUploads;
     use WithPagination;
 
     public bool $showModal = false;
@@ -41,6 +44,9 @@ class SourcesIndex extends Component
     public ?string $detectionError = null;
 
     public ?string $detectionNotice = null;
+
+    #[Validate('nullable|file|mimes:json|max:10240')]
+    public $importFile = null;
 
     public bool $allEnabled;
 
@@ -197,6 +203,76 @@ class SourcesIndex extends Component
         Source::query()->delete();
 
         $this->showClearModal = false;
+    }
+
+    public function exportSources(): StreamedResponse
+    {
+        $sources = Source::all()->map(fn (Source $s) => [
+            'name' => $s->name,
+            'url' => $s->url,
+            'is_enabled' => $s->is_enabled,
+            'parser_type' => $s->parser_type?->value,
+            'parser_config' => $s->parser_config,
+            'default_protocol' => $s->default_protocol?->value,
+        ]);
+
+        return response()->streamDownload(fn () => print $sources->toJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), 'sources.json');
+    }
+
+    public function updatedImportFile(): void
+    {
+        $this->validateOnly('importFile');
+
+        $data = json_decode(file_get_contents($this->importFile->getRealPath()), true);
+
+        if (! is_array($data)) {
+            Flux::toast(__('Invalid JSON file.'), variant: 'danger');
+            $this->importFile = null;
+
+            return;
+        }
+
+        $existingUrls = Source::pluck('url')->toArray();
+        $seenUrls = [];
+        $imported = 0;
+        $skipped = 0;
+
+        foreach ($data as $item) {
+            if (! is_array($item) || empty($item['name']) || empty($item['url'])) {
+                continue;
+            }
+
+            $url = $item['url'];
+
+            if (in_array($url, $existingUrls, true) || in_array($url, $seenUrls, true)) {
+                $skipped++;
+
+                continue;
+            }
+
+            $seenUrls[] = $url;
+
+            Source::create([
+                'name' => $item['name'],
+                'url' => $url,
+                'is_enabled' => $item['is_enabled'] ?? true,
+                'parser_type' => isset($item['parser_type']) ? SourceParserType::tryFrom($item['parser_type']) : null,
+                'parser_config' => $item['parser_config'] ?? null,
+                'default_protocol' => isset($item['default_protocol']) ? Protocol::tryFrom($item['default_protocol']) : null,
+            ]);
+
+            $imported++;
+        }
+
+        $this->importFile = null;
+
+        $msg = __(':count sources imported.', ['count' => $imported]);
+
+        if ($skipped > 0) {
+            $msg .= ' '.__(':count duplicates skipped.', ['count' => $skipped]);
+        }
+
+        Flux::toast($msg, variant: $imported > 0 ? 'success' : 'warning');
     }
 
     protected function rules(): array
