@@ -65,6 +65,14 @@ class Proxy extends Model
     }
 
     /**
+     * Full connection URI for HTTP proxy routing.
+     */
+    public function connectionUri(): string
+    {
+        return "{$this->protocol->value}://{$this->address}:{$this->port}";
+    }
+
+    /**
      * Apply dashboard filter criteria to the query.
      *
      * @param  array<string, mixed>  $filters

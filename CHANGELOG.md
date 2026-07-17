@@ -28,4 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Geo-location lookups now route through the proxy being tested instead of connecting directly from the server, so the geo service sees the proxy's actual location
+- Fixed "Already checking" toast blocking manual re-checks: the `checking` cache flag was set with a 600-second TTL in `CheckProxies` but never cleared after dispatching finished, causing "Check now" to be permanently disabled after a single auto-schedule run
+
 ### Security

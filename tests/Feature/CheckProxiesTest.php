@@ -12,7 +12,7 @@ function fakeCheckTargets(array $overrides = []): void
     Http::fake(array_merge([
         'www.google.com' => Http::response('<html>Search</html>', 200),
         'www.cloudflare.com' => Http::response('<html>Cloudflare</html>', 200),
-        'ip-api.com/*' => Http::response(['countryCode' => 'DE'], 200),
+        'ip-api.com/json' => Http::response(['countryCode' => 'DE'], 200),
     ], $overrides));
 }
 
@@ -59,7 +59,7 @@ test('marks both as failed when proxy is dead', function () {
     Http::fake([
         'www.google.com' => fn () => throw new ConnectionException('timeout'),
         'www.cloudflare.com' => fn () => throw new ConnectionException('timeout'),
-        'ip-api.com/*' => Http::response(['countryCode' => 'US'], 200),
+        'ip-api.com/json' => Http::response(['countryCode' => 'US'], 200),
     ]);
 
     $proxy = Proxy::factory()->create([
