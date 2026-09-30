@@ -10,9 +10,11 @@ A self-hosted proxy management dashboard. Add sources (plain text lists or JSON 
 
 ![Proxify Pro dashboard — live stats, filters and the proxy table](docs/screenshots/dashboard.png)
 
-| Sources | API access | Settings |
-|---|---|---|
-| ![Sources](docs/screenshots/sources.png) | ![API access](docs/screenshots/api-access.png) | ![Settings](docs/screenshots/settings.png) |
+| Sources | API access |
+|---|---|
+| ![Sources](docs/screenshots/sources.png) | ![API access](docs/screenshots/api-access.png) |
+
+![Settings](docs/screenshots/settings.png)
 
 ---
 
