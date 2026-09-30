@@ -6,11 +6,21 @@ A self-hosted proxy management dashboard. Add sources (plain text lists or JSON 
 
 ---
 
+## Screenshots
+
+![Proxify Pro dashboard — live stats, filters and the proxy table](docs/screenshots/dashboard.png)
+
+| Sources | API access | Settings |
+|---|---|---|
+| ![Sources](docs/screenshots/sources.png) | ![API access](docs/screenshots/api-access.png) | ![Settings](docs/screenshots/settings.png) |
+
+---
+
 ## Quick start (Docker)
 
 ```bash
-git clone https://github.com/star/proxify-pro.git
-cd proxify-pro
+git clone https://github.com/Jakub2841/Proxify-Pro.git
+cd Proxify-Pro
 docker compose up --build
 ```
 
